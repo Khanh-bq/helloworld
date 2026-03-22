@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎰 Quay Số Trúng Thưởng — Công Ty</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile menu button -->
+<button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+
+<div class="app-wrapper">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon floating">🎰</div>
+      <h1>Lucky Draw</h1>
+      <p>Quay số trúng thưởng</p>
+    </div>
+
+    <ul class="nav-menu">
+      <li><button class="nav-link active" data-page="dashboard"><span class="icon">📊</span> Tổng quan</button></li>
+      <li><button class="nav-link" data-page="employees"><span class="icon">👥</span> Nhân viên</button></li>
+      <li><button class="nav-link" data-page="prizes"><span class="icon">🏆</span> Giải thưởng</button></li>
+      <li><button class="nav-link" data-page="draw"><span class="icon">🎰</span> Quay số</button></li>
+      <li><button class="nav-link" data-page="results"><span class="icon">🎉</span> Kết quả</button></li>
+    </ul>
+
+    <div class="fund-box">
+      <div class="fund-label">💰 Tổng quỹ</div>
+      <div class="fund-amount" id="sidebar-fund">0 ₫</div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <h2>📊 Tổng quan</h2>
+          <p>Hệ thống quay số trúng thưởng đầu năm</p>
+        </div>
+        <button class="btn btn-secondary" onclick="loadDemoData()">⚡ Tải dữ liệu demo</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card gold">
+          <span class="stat-icon">💰</span>
+          <div class="stat-label">Tổng quỹ</div>
+          <div class="stat-value" id="stat-fund">0 ₫</div>
+          <div class="stat-sub">Đóng góp từ nhân viên</div>
+        </div>
+        <div class="stat-card purple">
+          <span class="stat-icon">👥</span>
+          <div class="stat-label">Nhân viên</div>
+          <div class="stat-value" id="stat-employees">0</div>
+          <div class="stat-sub">Người tham gia</div>
+        </div>
+        <div class="stat-card pink">
+          <span class="stat-icon">🎫</span>
+          <div class="stat-label">Vé tham dự</div>
+          <div class="stat-value" id="stat-tickets">0</div>
+          <div class="stat-sub">Tổng vé trong hệ thống</div>
+        </div>
+        <div class="stat-card green">
+          <span class="stat-icon">🏆</span>
+          <div class="stat-label">Tổng giá trị giải</div>
+          <div class="stat-value" id="stat-prizes-value">0 ₫</div>
+          <div class="stat-sub">Tất cả các giải cộng lại</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h3 style="font-size:18px;font-weight:700">Hoạt động gần đây</h3>
+          <button class="btn btn-primary btn-sm" onclick="navigate('draw')">🎰 Quay số ngay</button>
+        </div>
+        <div id="recent-activity">
+          <div class="empty-state">
+            <div class="icon">🎰</div>
+            <h3>Chưa có lượt quay nào</h3>
+            <p>Hãy thêm nhân viên và bắt đầu quay số</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px">
+        <div class="card" style="text-align:center;cursor:pointer" onclick="navigate('employees')">
+          <div style="font-size:36px;margin-bottom:12px">👥</div>
+          <h4 style="font-weight:700;margin-bottom:4px">Thêm nhân viên</h4>
+          <p style="font-size:13px;color:var(--text-secondary)">Đăng ký tham gia quay số</p>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="navigate('prizes')">
+          <div style="font-size:36px;margin-bottom:12px">🏆</div>
+          <h4 style="font-weight:700;margin-bottom:4px">Quản lý giải</h4>
+          <p style="font-size:13px;color:var(--text-secondary)">Chỉnh sửa giải thưởng</p>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="navigate('draw')">
+          <div style="font-size:36px;margin-bottom:12px">🎰</div>
+          <h4 style="font-weight:700;margin-bottom:4px">Bắt đầu quay</h4>
+          <p style="font-size:13px;color:var(--text-secondary)">Mở màn hình quay số</p>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="navigate('results')">
+          <div style="font-size:36px;margin-bottom:12px">🎉</div>
+          <h4 style="font-weight:700;margin-bottom:4px">Xem kết quả</h4>
+          <p style="font-size:13px;color:var(--text-secondary)">Danh sách người trúng</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EMPLOYEES ==================== -->
+    <section class="page" id="page-employees">
+      <div class="page-header">
+        <div>
+          <h2>👥 Quản lý nhân viên</h2>
+          <p>Thêm nhân viên và khoản đóng góp</p>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--text-secondary)">Tổng quỹ</div>
+            <div style="font-size:20px;font-weight:800;color:var(--secondary)" id="emp-total-fund">0 ₫</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--text-secondary)">Nhân viên</div>
+            <div style="font-size:20px;font-weight:800" id="emp-total-count">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add employee form -->
+      <div class="card" style="margin-bottom:24px">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:20px">➕ Thêm nhân viên mới</h3>
+        <form id="addEmployeeForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Họ và tên *</label>
+              <input type="text" class="form-control" id="new-emp-name" placeholder="Nguyễn Văn A" required />
+            </div>
+            <div class="form-group">
+              <label>Phòng ban</label>
+              <input type="text" class="form-control" id="new-emp-dept" placeholder="Kỹ thuật, Marketing..." />
+            </div>
+            <div class="form-group">
+              <label>Số tiền đóng (VNĐ) *</label>
+              <input type="number" class="form-control" id="new-emp-contribution" placeholder="100000" min="1" required />
+            </div>
+            <div class="form-group">
+              <label>Số vé / người</label>
+              <select class="form-control" id="new-emp-tickets">
+                <option value="1">1 vé / người</option>
+                <option value="by100k">1 vé / 100.000đ</option>
+                <option value="by200k">1 vé / 200.000đ</option>
+                <option value="by500k">1 vé / 500.000đ</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <button type="submit" class="btn btn-primary">➕ Thêm nhân viên</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Employee table -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Họ tên</th>
+              <th>Phòng ban</th>
+              <th>Đóng góp</th>
+              <th>Số vé</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="employee-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Chưa có nhân viên nào</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-danger btn-sm" onclick="resetAll()">🗑️ Xóa toàn bộ dữ liệu</button>
+      </div>
+    </section>
+
+    <!-- ==================== PRIZES ==================== -->
+    <section class="page" id="page-prizes">
+      <div class="page-header">
+        <div>
+          <h2>🏆 Quản lý giải thưởng</h2>
+          <p>Thêm và chỉnh sửa các giải</p>
+        </div>
+      </div>
+
+      <!-- Add prize form -->
+      <div class="card" style="margin-bottom:24px">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:20px">➕ Thêm giải thưởng mới</h3>
+        <form id="addPrizeForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tên giải *</label>
+              <input type="text" class="form-control" id="new-prize-name" placeholder="Giải Đặc Biệt" required />
+            </div>
+            <div class="form-group">
+              <label>Giá trị (VNĐ) *</label>
+              <input type="number" class="form-control" id="new-prize-value" placeholder="10000000" min="1" required />
+            </div>
+            <div class="form-group">
+              <label>Số lượng</label>
+              <input type="number" class="form-control" id="new-prize-count" placeholder="1" min="1" value="1" />
+            </div>
+            <div class="form-group">
+              <label>Biểu tượng</label>
+              <input type="text" class="form-control" id="new-prize-emoji" placeholder="🏆" maxlength="2" value="🎁" />
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <button type="submit" class="btn btn-primary">➕ Thêm giải</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="prizes-grid" id="prizes-grid"></div>
+    </section>
+
+    <!-- ==================== DRAW ==================== -->
+    <section class="page" id="page-draw">
+      <div class="page-header">
+        <div>
+          <h2>🎰 Quay số trúng thưởng</h2>
+          <p>Chọn giải và bắt đầu quay</p>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="resetDraw()">🔄 Reset quay số</button>
+      </div>
+
+      <!-- Progress -->
+      <div class="draw-progress">
+        <div class="draw-progress-label">
+          <span>Tiến độ trao giải</span>
+          <span id="draw-progress-text">0 / 0 giải đã trao</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="draw-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Prize selector -->
+      <div class="card" style="margin-bottom:24px">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text-secondary)">CHỌN GIẢI THƯỞNG</h3>
+        <div class="prize-selector" id="prize-selector"></div>
+      </div>
+
+      <!-- Drawing stage -->
+      <div class="draw-stage">
+        <div class="current-prize">ĐANG QUAY</div>
+        <div class="current-prize-name" id="current-prize-name">— Chọn giải thưởng —</div>
+        <div class="current-prize-value" id="current-prize-value"></div>
+
+        <!-- Number drum -->
+        <div class="number-drum">
+          <div class="drum-digit" id="drum-0">?</div>
+          <div class="drum-digit" id="drum-1">?</div>
+          <div class="drum-digit" id="drum-2">?</div>
+        </div>
+
+        <div class="draw-controls">
+          <button class="btn-draw" id="draw-btn" disabled>🎯 Chọn giải trước</button>
+        </div>
+      </div>
+
+      <!-- Winner announcement -->
+      <div class="winner-announce" id="winner-announce">
+        <div class="winner-card">
+          <div class="winner-trophy">🎉</div>
+          <div class="winner-label">NGƯỜI TRÚNG GIẢI</div>
+          <div class="winner-number" id="winner-number">#000</div>
+          <div class="winner-name" id="winner-name">Tên nhân viên</div>
+          <div class="winner-prize" id="winner-prize-name">Giải thưởng</div>
+        </div>
+      </div>
+
+      <!-- Draw history -->
+      <div class="draw-history" style="margin-top:28px">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px">📋 Lịch sử quay số</h3>
+        <div id="draw-history-list"></div>
+      </div>
+    </section>
+
+    <!-- ==================== RESULTS ==================== -->
+    <section class="page" id="page-results">
+      <div class="page-header">
+        <div>
+          <h2>🎉 Kết quả trúng thưởng</h2>
+          <p>Danh sách người may mắn</p>
+        </div>
+        <button class="btn btn-gold" onclick="exportResults()">📥 Xuất CSV</button>
+      </div>
+
+      <div class="results-grid" id="results-grid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="icon">🏆</div>
+          <h3>Chưa có kết quả</h3>
+          <p>Quay số để xem kết quả tại đây</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Edit Employee Modal -->
+<div class="modal-overlay" id="editEmpModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ Sửa thông tin nhân viên</h3>
+      <button class="modal-close" onclick="closeModal('editEmpModal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-emp-id" />
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group">
+        <label>Họ và tên</label>
+        <input type="text" class="form-control" id="edit-emp-name" />
+      </div>
+      <div class="form-group">
+        <label>Phòng ban</label>
+        <input type="text" class="form-control" id="edit-emp-dept" />
+      </div>
+      <div class="form-group">
+        <label>Số tiền đóng (VNĐ)</label>
+        <input type="number" class="form-control" id="edit-emp-contribution" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editEmpModal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveEditEmployee()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Prize Modal -->
+<div class="modal-overlay" id="editPrizeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ Sửa giải thưởng</h3>
+      <button class="modal-close" onclick="closeModal('editPrizeModal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-prize-id" />
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group">
+        <label>Tên giải</label>
+        <input type="text" class="form-control" id="edit-prize-name" />
+      </div>
+      <div class="form-group">
+        <label>Giá trị (VNĐ)</label>
+        <input type="number" class="form-control" id="edit-prize-value" />
+      </div>
+      <div class="form-group">
+        <label>Số lượng</label>
+        <input type="number" class="form-control" id="edit-prize-count" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Biểu tượng</label>
+        <input type="text" class="form-control" id="edit-prize-emoji" maxlength="2" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editPrizeModal')">Hủy</button>
+      <button class="btn btn-primary" onclick="saveEditPrize()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
