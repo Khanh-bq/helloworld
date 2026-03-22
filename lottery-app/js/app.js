@@ -61,11 +61,10 @@ const state = {
   drawHistory: [],
   currentPrizeId: null,
   isDrawing: false,
-  ticketPool: [], // Array of ticket numbers mapped to employee IDs
+  ticketPool: [], // { num: 1-99, employeeId }  — 1 ticket per person, chosen by them
 };
 
-let drumAnimInterval = null;
-let nextTicketNum = 1;
+const TICKET_PRICE = 100000; // Fixed price per ticket
 
 // ==================== UTILS ====================
 function formatVND(amount) {
@@ -95,7 +94,6 @@ function saveState() {
     prizes: state.prizes,
     drawHistory: state.drawHistory,
     ticketPool: state.ticketPool,
-    nextTicketNum,
   }));
 }
 
@@ -108,7 +106,6 @@ function loadState() {
       state.prizes = data.prizes || state.prizes;
       state.drawHistory = data.drawHistory || [];
       state.ticketPool = data.ticketPool || [];
-      nextTicketNum = data.nextTicketNum || 1;
     } catch(e) {
       console.error('Failed to load state', e);
     }
@@ -137,14 +134,13 @@ function navigate(page) {
 
 // ==================== DASHBOARD ====================
 function renderDashboard() {
-  const totalFund = state.employees.reduce((s, e) => s + e.contribution, 0);
-  const totalTickets = state.ticketPool.length;
-  const totalWinners = state.drawHistory.length;
+  const totalFund = state.employees.length * TICKET_PRICE;
   const totalPrizeValue = state.prizes.reduce((s, p) => s + p.value * p.count, 0);
+  const remaining99 = 99 - state.employees.length;
 
   document.getElementById('stat-fund').textContent = formatVND(totalFund);
   document.getElementById('stat-employees').textContent = state.employees.length;
-  document.getElementById('stat-tickets').textContent = totalTickets;
+  document.getElementById('stat-tickets').textContent = `${state.employees.length} / 99`;
   document.getElementById('stat-prizes-value').textContent = formatVND(totalPrizeValue);
   document.getElementById('sidebar-fund').textContent = formatVND(totalFund);
 
@@ -175,13 +171,13 @@ function renderDashboard() {
 // ==================== EMPLOYEES ====================
 function renderEmployees() {
   const tbody = document.getElementById('employee-tbody');
-  const totalFund = state.employees.reduce((s, e) => s + e.contribution, 0);
+  const totalFund = state.employees.length * TICKET_PRICE;
   document.getElementById('emp-total-fund').textContent = formatVND(totalFund);
   document.getElementById('emp-total-count').textContent = state.employees.length;
 
   if (state.employees.length === 0) {
     tbody.innerHTML = `
-      <tr><td colspan="6">
+      <tr><td colspan="5">
         <div class="empty-state" style="padding:40px">
           <div class="icon">👥</div>
           <h3>Chưa có nhân viên</h3>
@@ -192,15 +188,16 @@ function renderEmployees() {
   }
 
   tbody.innerHTML = state.employees.map(emp => {
-    const tickets = state.ticketPool.filter(t => t.employeeId === emp.id);
+    const ticket = state.ticketPool.find(t => t.employeeId === emp.id);
     const won = state.drawHistory.filter(h => h.employeeId === emp.id);
     return `
       <tr>
         <td><strong>${emp.name}</strong></td>
         <td>${emp.department || '—'}</td>
-        <td style="color: var(--secondary); font-weight: 700">${formatVND(emp.contribution)}</td>
         <td>
-          ${tickets.map(t => `<span class="ticket-badge">🎫 ${t.num}</span>`).join(' ')}
+          ${ticket
+            ? `<span class="ticket-badge" style="font-size:15px;padding:4px 14px">🎫 ${ticket.num}</span>`
+            : '<span style="color:var(--danger)">Chưa có vé</span>'}
         </td>
         <td>
           ${won.length > 0
@@ -218,35 +215,35 @@ function renderEmployees() {
   }).join('');
 }
 
+function takenNumbers() {
+  return new Set(state.ticketPool.map(t => t.num));
+}
+
 function addEmployee(e) {
   e.preventDefault();
   const name = document.getElementById('new-emp-name').value.trim();
   const department = document.getElementById('new-emp-dept').value.trim();
-  const contribution = parseInt(document.getElementById('new-emp-contribution').value);
-  const ticketMode = document.getElementById('new-emp-tickets').value;
+  const ticketNum = parseInt(document.getElementById('new-emp-ticket').value);
 
-  if (!name || !contribution || contribution <= 0) {
-    showToast('Vui lòng nhập đầy đủ thông tin', 'error');
-    return;
+  if (!name) { showToast('Vui lòng nhập tên nhân viên', 'error'); return; }
+  if (!ticketNum || ticketNum < 1 || ticketNum > 99) {
+    showToast('Số vé phải từ 1 đến 99', 'error'); return;
+  }
+  if (takenNumbers().has(ticketNum)) {
+    showToast(`Số ${ticketNum} đã có người chọn rồi!`, 'error'); return;
+  }
+  if (state.employees.length >= 99) {
+    showToast('Đã đủ 99 người tham gia!', 'error'); return;
   }
 
-  const emp = { id: genId(), name, department, contribution, joinedAt: new Date().toLocaleDateString('vi-VN') };
+  const emp = { id: genId(), name, department, joinedAt: new Date().toLocaleDateString('vi-VN') };
   state.employees.push(emp);
-
-  // Assign tickets
-  let numTickets = 1;
-  if (ticketMode === 'by100k') numTickets = Math.max(1, Math.floor(contribution / 100000));
-  else if (ticketMode === 'by200k') numTickets = Math.max(1, Math.floor(contribution / 200000));
-  else if (ticketMode === 'by500k') numTickets = Math.max(1, Math.floor(contribution / 500000));
-
-  for (let i = 0; i < numTickets; i++) {
-    state.ticketPool.push({ num: nextTicketNum++, employeeId: emp.id });
-  }
+  state.ticketPool.push({ num: ticketNum, employeeId: emp.id });
 
   saveState();
   renderEmployees();
   renderDashboard();
-  showToast(`Đã thêm ${name} với ${numTickets} vé`, 'success');
+  showToast(`Đã thêm ${name} — vé số ${ticketNum}`, 'success');
   e.target.reset();
 }
 
@@ -263,10 +260,11 @@ function deleteEmployee(id) {
 function editEmployee(id) {
   const emp = state.employees.find(e => e.id === id);
   if (!emp) return;
+  const ticket = state.ticketPool.find(t => t.employeeId === id);
   document.getElementById('edit-emp-id').value = emp.id;
   document.getElementById('edit-emp-name').value = emp.name;
   document.getElementById('edit-emp-dept').value = emp.department || '';
-  document.getElementById('edit-emp-contribution').value = emp.contribution;
+  document.getElementById('edit-emp-ticket').value = ticket ? ticket.num : '';
   document.getElementById('editEmpModal').classList.add('open');
 }
 
@@ -274,9 +272,25 @@ function saveEditEmployee() {
   const id = document.getElementById('edit-emp-id').value;
   const emp = state.employees.find(e => e.id === id);
   if (!emp) return;
+  const newTicketNum = parseInt(document.getElementById('edit-emp-ticket').value);
+
+  if (!newTicketNum || newTicketNum < 1 || newTicketNum > 99) {
+    showToast('Số vé phải từ 1 đến 99', 'error'); return;
+  }
+  // Check uniqueness (excluding current person's own ticket)
+  const conflict = state.ticketPool.find(t => t.num === newTicketNum && t.employeeId !== id);
+  if (conflict) {
+    showToast(`Số ${newTicketNum} đã có người khác chọn!`, 'error'); return;
+  }
+
   emp.name = document.getElementById('edit-emp-name').value.trim();
   emp.department = document.getElementById('edit-emp-dept').value.trim();
-  emp.contribution = parseInt(document.getElementById('edit-emp-contribution').value);
+
+  // Update ticket
+  const ticket = state.ticketPool.find(t => t.employeeId === id);
+  if (ticket) ticket.num = newTicketNum;
+  else state.ticketPool.push({ num: newTicketNum, employeeId: id });
+
   saveState();
   closeModal('editEmpModal');
   renderEmployees();
@@ -452,7 +466,7 @@ async function startDraw() {
   if (!winnerEmp) { state.isDrawing = false; return; }
 
   // Drum animation
-  await animateDrum(winner.num.toString().padStart(3, '0'));
+  await animateDrum(winner.num.toString().padStart(2, '0'));
 
   // Record result
   const entry = {
@@ -624,7 +638,6 @@ function resetAll() {
   state.prizes.forEach(p => p.winners = []);
   state.drawHistory = [];
   state.ticketPool = [];
-  nextTicketNum = 1;
   saveState();
   navigate('dashboard');
   showToast('Đã xóa toàn bộ dữ liệu', 'info');
@@ -668,22 +681,22 @@ function loadDemoData() {
     'Tô Thị Uyên', 'Mai Văn Vinh', 'Hà Thị Xuân', 'Dương Văn Yên',
   ];
 
-  const contributions = [100000, 200000, 300000, 500000, 100000, 200000, 150000, 400000, 250000, 300000,
-    200000, 500000, 100000, 350000, 200000, 300000, 150000, 500000, 200000, 100000];
+  // Shuffle 1-99 and pick first N as demo ticket numbers
+  const pool = Array.from({ length: 99 }, (_, i) => i + 1);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
 
   names.forEach((name, i) => {
     const emp = {
       id: genId(),
       name,
       department: depts[i % depts.length],
-      contribution: contributions[i],
       joinedAt: new Date().toLocaleDateString('vi-VN')
     };
     state.employees.push(emp);
-    const numTickets = Math.max(1, Math.floor(contributions[i] / 100000));
-    for (let j = 0; j < numTickets; j++) {
-      state.ticketPool.push({ num: nextTicketNum++, employeeId: emp.id });
-    }
+    state.ticketPool.push({ num: pool[i], employeeId: emp.id });
   });
 
   saveState();
@@ -717,5 +730,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Update sidebar fund amount
   document.getElementById('sidebar-fund').textContent =
-    formatVND(state.employees.reduce((s, e) => s + e.contribution, 0));
+    formatVND(state.employees.length * TICKET_PRICE);
 });

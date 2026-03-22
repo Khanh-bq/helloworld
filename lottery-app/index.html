@@ -59,7 +59,7 @@
           <span class="stat-icon">💰</span>
           <div class="stat-label">Tổng quỹ</div>
           <div class="stat-value" id="stat-fund">0 ₫</div>
-          <div class="stat-sub">Đóng góp từ nhân viên</div>
+          <div class="stat-sub">Số người × 100.000đ/vé</div>
         </div>
         <div class="stat-card purple">
           <span class="stat-icon">👥</span>
@@ -69,9 +69,9 @@
         </div>
         <div class="stat-card pink">
           <span class="stat-icon">🎫</span>
-          <div class="stat-label">Vé tham dự</div>
-          <div class="stat-value" id="stat-tickets">0</div>
-          <div class="stat-sub">Tổng vé trong hệ thống</div>
+          <div class="stat-label">Dải số đã chọn</div>
+          <div class="stat-value" id="stat-tickets">0 / 99</div>
+          <div class="stat-sub">Số vé đã đăng ký</div>
         </div>
         <div class="stat-card green">
           <span class="stat-icon">🏆</span>
@@ -125,7 +125,7 @@
       <div class="page-header">
         <div>
           <h2>👥 Quản lý nhân viên</h2>
-          <p>Thêm nhân viên và khoản đóng góp</p>
+          <p>Mỗi người chọn 1 số (1–99) &nbsp;•&nbsp; Mỗi vé 100.000đ &nbsp;•&nbsp; Xác suất ngang nhau</p>
         </div>
         <div style="display:flex;gap:12px;align-items:center">
           <div style="text-align:right">
@@ -153,18 +153,12 @@
               <input type="text" class="form-control" id="new-emp-dept" placeholder="Kỹ thuật, Marketing..." />
             </div>
             <div class="form-group">
-              <label>Số tiền đóng (VNĐ) *</label>
-              <input type="number" class="form-control" id="new-emp-contribution" placeholder="100000" min="1" required />
+              <label>Số vé tự chọn (1–99) *</label>
+              <input type="number" class="form-control" id="new-emp-ticket" placeholder="Ví dụ: 7" min="1" max="99" required />
             </div>
-            <div class="form-group">
-              <label>Số vé / người</label>
-              <select class="form-control" id="new-emp-tickets">
-                <option value="1">1 vé / người</option>
-                <option value="by100k">1 vé / 100.000đ</option>
-                <option value="by200k">1 vé / 200.000đ</option>
-                <option value="by500k">1 vé / 500.000đ</option>
-              </select>
-            </div>
+          </div>
+          <div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">
+            💡 Mỗi số chỉ được 1 người chọn &nbsp;•&nbsp; Phí tham gia: <strong style="color:var(--secondary)">100.000đ / vé</strong>
           </div>
           <div style="margin-top:16px">
             <button type="submit" class="btn btn-primary">➕ Thêm nhân viên</button>
@@ -179,7 +173,6 @@
             <tr>
               <th>Họ tên</th>
               <th>Phòng ban</th>
-              <th>Đóng góp</th>
               <th>Số vé</th>
               <th>Trạng thái</th>
               <th>Thao tác</th>
@@ -269,11 +262,10 @@
         <div class="current-prize-name" id="current-prize-name">— Chọn giải thưởng —</div>
         <div class="current-prize-value" id="current-prize-value"></div>
 
-        <!-- Number drum -->
+        <!-- Number drum (2 digits: 01–99) -->
         <div class="number-drum">
           <div class="drum-digit" id="drum-0">?</div>
           <div class="drum-digit" id="drum-1">?</div>
-          <div class="drum-digit" id="drum-2">?</div>
         </div>
 
         <div class="draw-controls">
@@ -341,8 +333,8 @@
         <input type="text" class="form-control" id="edit-emp-dept" />
       </div>
       <div class="form-group">
-        <label>Số tiền đóng (VNĐ)</label>
-        <input type="number" class="form-control" id="edit-emp-contribution" />
+        <label>Số vé tự chọn (1–99)</label>
+        <input type="number" class="form-control" id="edit-emp-ticket" min="1" max="99" />
       </div>
     </div>
     <div class="modal-footer">
